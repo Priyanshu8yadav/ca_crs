@@ -1,0 +1,4 @@
+frame,zone_name,zone_id,count,density,d_norm,s_norm,c_norm,crs,risk,factor,gate_summary,proj_crs,crr,resource_status
+1,Entry Corridor,0,1058,30.229,1.0,0.0,0.0,1.0,DANGER,DENSITY,Gate-Main-Entry:OPEN[HIGH] | Gate-Side-A:OPEN[MEDIUM],0.7912,0.0,
+1,Main Hall,1,1226,15.325,1.0,0.0,0.0,1.0,DANGER,DENSITY,Gate-Side-A:OPEN[HIGH] | Gate-Center-B:OPEN[MEDIUM],0.7912,0.0,
+1,Exit Plaza,2,1089,24.2,1.0,0.0,0.0,1.0,DANGER,DENSITY,Gate-Center-B:OPEN[HIGH] | Gate-Exit-Main:OPEN[MEDIUM],0.7912,0.0,

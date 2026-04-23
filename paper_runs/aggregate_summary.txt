@@ -1,0 +1,23 @@
+=== CA-CRS+ Batch Summary ===
+
+scen_a
+  Sampled frames    : 44
+  Danger frames     : 36 (81.8%)
+  Mean frame-max CRS: 0.9120
+  Mean proj. CRS    : 0.5402
+  Mean positive CRR : 29.5%
+
+scen_b
+  Sampled frames    : 64
+  Danger frames     : 1 (1.6%)
+  Mean frame-max CRS: 0.5321
+  Mean proj. CRS    : 0.4290
+  Mean positive CRR : 21.8%
+
+scen_c
+  Sampled frames    : 54
+  Danger frames     : 5 (9.3%)
+  Mean frame-max CRS: 0.5713
+  Mean proj. CRS    : 0.4273
+  Mean positive CRR : 22.8%
+
