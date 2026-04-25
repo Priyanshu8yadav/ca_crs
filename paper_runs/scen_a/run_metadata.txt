@@ -7,7 +7,7 @@ Source frames      : 1303
 Frame stride       : 30
 Sampled FPS        : 1.998
 Processed frames   : 44
-Elapsed seconds    : 322.03
+Elapsed seconds    : 298.23
 YOLO conf          : 0.04
 Tile size          : 320
 Tile overlap       : 0.3

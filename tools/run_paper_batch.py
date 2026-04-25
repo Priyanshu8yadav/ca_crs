@@ -23,6 +23,12 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 
+SCENARIO_LABELS = {
+    "scen_a": "Entry Corridor",
+    "scen_b": "Main Hall",
+    "scen_c": "Exit Plaza",
+}
+
 
 def existing_default_inputs():
     candidates = [
@@ -68,9 +74,10 @@ def summarize_csv(video_name, csv_path):
     _, frame_max_proj = frame_max_series(records, "proj_crs")
     crr_values = [floatf(record["crr"]) for record in records]
     positive_crr = [value for value in crr_values if value > 0]
+    label = SCENARIO_LABELS.get(video_name, video_name)
 
     return {
-        "video": video_name,
+        "video": label,
         "records": len(records),
         "frames": len(unique_frames),
         "danger_records": len(danger_records),
@@ -150,6 +157,7 @@ def main(args):
                 "--input", str(video_path),
                 "--output_dir", str(run_dir),
                 "--no_display",
+                "--skip_builtin_figures",
                 "--density_conf", str(args.density_conf),
                 "--tile_overlap", str(args.tile_overlap),
                 "--tile_size", str(args.tile_size),
@@ -160,6 +168,9 @@ def main(args):
                 "--marshals", str(args.marshals),
                 "--medics", str(args.medics),
                 "--ambulances", str(args.ambulances),
+                "--zone_layout", args.zone_layout,
+                "--zone_area_m2", str(args.zone_area_m2),
+                "--zone_capacity", str(args.zone_capacity),
             ]
             if args.frame_stride > 0:
                 cmd.extend(["--frame_stride", str(args.frame_stride)])
@@ -174,14 +185,17 @@ def main(args):
             run_checked(cmd)
 
         fig_dir = run_dir / "figures"
+        scenario_label = SCENARIO_LABELS.get(
+            stem, stem.replace("_", " ").title()
+        )
+
         fig_cmd = [
             sys.executable,
             str(ROOT / "generate_paper_figures.py"),
             "--csv", str(csv_path),
             "--outdir", str(fig_dir),
-            "--scenario", stem.replace("_", " ").title(),
+            "--scenario", scenario_label,
             "--marshals", str(args.marshals),
-            "--multizone",
         ]
         run_checked(fig_cmd)
 
@@ -236,6 +250,10 @@ if __name__ == "__main__":
     parser.add_argument("--marshals", type=int, default=20)
     parser.add_argument("--medics", type=int, default=5)
     parser.add_argument("--ambulances", type=int, default=3)
+    parser.add_argument("--zone_layout", choices=["full_frame", "three_strip"],
+                        default="full_frame")
+    parser.add_argument("--zone_area_m2", type=float, default=140.0)
+    parser.add_argument("--zone_capacity", type=int, default=980)
     parser.add_argument("--save_output_video", action="store_true")
     parser.add_argument("--full_frame_pass", action="store_true")
     parser.add_argument("--augment", action="store_true")

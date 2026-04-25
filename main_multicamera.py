@@ -363,8 +363,9 @@ def main(args):
     cv2.destroyAllWindows()
 
     logger.save_csv()
-    logger.plot_crs_timeline("Multi-Camera Scenarios")
-    logger.plot_components()
+    if not args.skip_builtin_figures:
+        logger.plot_crs_timeline("Multi-Camera Scenarios")
+        logger.plot_components()
     logger.save_summary()
     print(f"[INFO] Results saved to: {args.output_dir}/")
 
@@ -380,6 +381,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", default="results/multicam")
     parser.add_argument("--no_display", action="store_true",
                         help="Run batch mode without OpenCV display window")
+    parser.add_argument("--skip_builtin_figures", action="store_true",
+                        help="Skip top-level logger figure exports")
     parser.add_argument("--frame_stride", type=int, default=0,
                         help="Process every Nth frame per camera; 0 uses target_fps")
     parser.add_argument("--target_fps", type=float, default=2.0,

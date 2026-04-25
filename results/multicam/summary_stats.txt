@@ -1,14 +1,14 @@
 === CA-CRS+ Summary Statistics ===
 
-Total records      : 46
-Unique frames      : 34
-DANGER records     : 7 (15.2%)
-DANGER frames      : 5 (14.7%)
-Mean CA-CRS+       : 0.5875
-Mean Projected CRS : 0.4330
-Mean CRR (%)       : 23.8%
-Mean positive CRR  : 25.4%
-Improved projections: 46 (100.0%)
+Total records      : 80
+Unique frames      : 59
+DANGER records     : 8 (10.0%)
+DANGER frames      : 6 (10.2%)
+Mean CA-CRS+       : 0.5557
+Mean Projected CRS : 0.4188
+Mean CRR (%)       : 22.7%
+Mean positive CRR  : 23.5%
+Improved projections: 80 (100.0%)
 
 Dominant factor breakdown (DANGER records):
-  DENSITY     :    7 (100.0%)
+  DENSITY     :    8 (100.0%)

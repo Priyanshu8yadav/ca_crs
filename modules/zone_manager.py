@@ -22,7 +22,17 @@ class ZoneManager:
     or entire camera feeds (multi-camera mode).
     """
 
-    def __init__(self, frame_shape=None, config_path=None, mode="single"):
+    def __init__(
+        self,
+        frame_shape=None,
+        config_path=None,
+        mode="single",
+        zone_layout="full_frame",
+        full_frame_area_m2=140.0,
+        full_frame_capacity=980,
+        full_frame_name="Crowd Zone",
+        full_frame_gates=None,
+    ):
         """
         Parameters
         ----------
@@ -31,6 +41,13 @@ class ZoneManager:
         mode        : "single" or "multi"
         """
         self.mode = mode
+        self.zone_layout = zone_layout
+        self.full_frame_area_m2 = float(full_frame_area_m2)
+        self.full_frame_capacity = int(full_frame_capacity)
+        self.full_frame_name = str(full_frame_name)
+        self.full_frame_gates = list(
+            full_frame_gates if full_frame_gates else ["Gate-Primary", "Gate-Secondary"]
+        )
         if config_path:
             self.zones = self._load_config(config_path)
         elif frame_shape is not None:
@@ -55,7 +72,25 @@ class ZoneManager:
             return json.load(f)["zones"]
 
     def _default_zones(self, h, w):
-        """Three horizontal strips — default single-camera config."""
+        """Default single-camera config."""
+        if self.zone_layout == "full_frame":
+            return [
+                {
+                    "id": 0,
+                    "name": self.full_frame_name,
+                    "polygon": [(0, 0), (w, 0), (w, h), (0, h)],
+                    "area_m2": self.full_frame_area_m2,
+                    "capacity": self.full_frame_capacity,
+                    "gates": self.full_frame_gates,
+                    "adjacent_zones": [],
+                    "camera_id": 0,
+                }
+            ]
+
+        if self.zone_layout != "three_strip":
+            raise ValueError(f"Unsupported zone layout: {self.zone_layout}")
+
+        # Three horizontal strips — legacy single-camera config.
         return [
             {
                 "id": 0,

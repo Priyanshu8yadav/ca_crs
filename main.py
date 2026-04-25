@@ -81,7 +81,13 @@ def main(args):
     sampled_fps = source_fps / effective_stride if source_fps > 0 else 0.0
 
     # ── Init modules ──────────────────────────────────────────────────────
-    zone_mgr    = ZoneManager(frame_shape=frame0.shape)
+    zone_mgr    = ZoneManager(
+                    frame_shape=frame0.shape,
+                    zone_layout=args.zone_layout,
+                    full_frame_area_m2=args.zone_area_m2,
+                    full_frame_capacity=args.zone_capacity,
+                    full_frame_name=args.zone_name,
+                    full_frame_gates=args.zone_gates)
     density_est = DensityEstimator(
                     conf=args.density_conf,
                     tile_rows=args.tile_rows,
@@ -306,8 +312,9 @@ def main(args):
     cv2.destroyAllWindows()
 
     logger.save_csv()
-    logger.plot_crs_timeline()
-    logger.plot_components()
+    if not args.skip_builtin_figures:
+        logger.plot_crs_timeline()
+        logger.plot_components()
     logger.save_summary()
     save_run_metadata(
         args.output_dir,
@@ -339,6 +346,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", default="results")
     parser.add_argument("--no_display", action="store_true",
                         help="Run batch mode without OpenCV display window")
+    parser.add_argument("--skip_builtin_figures", action="store_true",
+                        help="Skip top-level logger figure exports")
     parser.add_argument("--frame_stride", type=int, default=0,
                         help="Process every Nth frame; 0 uses target_fps")
     parser.add_argument("--target_fps", type=float, default=8.0,
@@ -378,5 +387,17 @@ if __name__ == "__main__":
     parser.add_argument("--count_correction", type=float, default=1.8,
                         help=("Multiplier from raw YOLO detections to "
                               "estimated crowd count"))
+    parser.add_argument("--zone_layout", choices=["full_frame", "three_strip"],
+                        default="full_frame",
+                        help="Single-video zone layout")
+    parser.add_argument("--zone_area_m2", type=float, default=140.0,
+                        help="Physical area assigned to the full-frame zone")
+    parser.add_argument("--zone_capacity", type=int, default=980,
+                        help="Safe-capacity estimate for the full-frame zone")
+    parser.add_argument("--zone_name", default="Crowd Zone",
+                        help="Name for the full-frame zone in single-video mode")
+    parser.add_argument("--zone_gates", nargs="+",
+                        default=["Gate-Primary", "Gate-Secondary"],
+                        help="Gate names for the full-frame zone")
     args = parser.parse_args()
     main(args)

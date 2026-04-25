@@ -1,4 +1,0 @@
-frame,zone_name,zone_id,count,density,d_norm,s_norm,c_norm,crs,risk,factor,gate_summary,proj_crs,crr,resource_status
-1,Entry Zone,0,202,5.05,0.7214,0.0,0.0,1.0,DANGER,DENSITY,Gate-1:OPEN[HIGH] | Gate-2:OPEN[MEDIUM],0.4556,54.4,CRITICAL
-1,Central Zone,1,698,11.633,1.0,0.0,0.0,1.0,DANGER,DENSITY,Gate-2:OPEN[HIGH] | Gate-3:OPEN[MEDIUM],0.7912,0.0,CRITICAL
-1,Exit Zone,2,385,9.625,1.0,0.0,0.0,1.0,DANGER,DENSITY,Gate-3:OPEN[HIGH] | Gate-4:OPEN[MEDIUM],0.7912,0.0,CRITICAL

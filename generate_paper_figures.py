@@ -28,6 +28,10 @@ plt.rcParams.update({
     "xtick.labelsize": 9,
     "ytick.labelsize": 9,
     "legend.fontsize": 9,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.facecolor": "#FCFCFC",
+    "figure.facecolor": "white",
 })
 
 # ── Load CSV ──────────────────────────────────────────────────────────────
@@ -51,6 +55,17 @@ def frame_groups(records):
     return groups
 
 
+def style_axes(ax):
+    ax.grid(True, alpha=0.26, linewidth=0.8)
+    ax.set_axisbelow(True)
+
+
+def save_figure(fig, path):
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"[Saved] {path}")
+
+
 # ── Figure 1: CA-CRS+ timeline ────────────────────────────────────────────
 
 def fig1_crs_timeline(records, scenario_name="Real Crowd Video", outdir="results/paper_figures"):
@@ -58,6 +73,7 @@ def fig1_crs_timeline(records, scenario_name="Real Crowd Video", outdir="results
     frames = sorted(groups)
     crs = [max(floatf(r["crs"]) for r in groups[frame]) for frame in frames]
     proj = [max(floatf(r["proj_crs"]) for r in groups[frame]) for frame in frames]
+    peak_idx = int(np.argmax(crs)) if crs else 0
 
     fig, ax = plt.subplots(figsize=(9, 3.6))
     ax.plot(frames, crs,  color="#C0392B", lw=1.8, label="CA-CRS+ score")
@@ -74,12 +90,20 @@ def fig1_crs_timeline(records, scenario_name="Real Crowd Video", outdir="results
     ax.set_ylabel("CA-CRS+ Score")
     ax.set_title(f"CA-CRS+ Score Over Time — {scenario_name}")
     ax.set_ylim(0, 1.05)
+    if crs:
+        ax.scatter([frames[peak_idx]], [crs[peak_idx]], color="#922B21", s=28, zorder=5)
+        ax.annotate(
+            f"peak={crs[peak_idx]:.3f}",
+            xy=(frames[peak_idx], crs[peak_idx]),
+            xytext=(10, -16),
+            textcoords="offset points",
+            fontsize=8,
+            color="#922B21",
+        )
     ax.legend(loc="upper left", framealpha=0.85)
-    ax.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.savefig(f"{outdir}/fig1_crs_timeline.png", dpi=180)
-    plt.close()
-    print(f"[Fig1] Saved → {outdir}/fig1_crs_timeline.png")
+    style_axes(ax)
+    fig.tight_layout()
+    save_figure(fig, f"{outdir}/fig1_crs_timeline.png")
 
 
 # ── Figure 2: Multi-zone per-zone CRS ────────────────────────────────────
@@ -95,7 +119,14 @@ def fig2_multizone(records, outdir="results/paper_figures"):
                "#8E44AD", "#D35400"]
     fig, ax = plt.subplots(figsize=(9, 3.6))
 
-    for i, (zname, zd) in enumerate(zone_data.items()):
+    preferred_order = ["Entry Corridor", "Main Hall", "Exit Plaza"]
+    ordered_names = [name for name in preferred_order if name in zone_data]
+    ordered_names.extend(
+        sorted(name for name in zone_data if name not in preferred_order)
+    )
+
+    for i, zname in enumerate(ordered_names):
+        zd = zone_data[zname]
         c = colors[i % len(colors)]
         ax.plot(zd["frames"], zd["crs"],
                 label=zname, color=c, lw=1.8)
@@ -114,11 +145,9 @@ def fig2_multizone(records, outdir="results/paper_figures"):
     ax.set_title("Per-Zone CA-CRS+ Scores — Multi-Zone Scenario D")
     ax.set_ylim(0, 1.05)
     ax.legend(framealpha=0.85)
-    ax.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.savefig(f"{outdir}/fig_multizone.png", dpi=180)
-    plt.close()
-    print(f"[Fig2] Saved → {outdir}/fig_multizone.png")
+    style_axes(ax)
+    fig.tight_layout()
+    save_figure(fig, f"{outdir}/fig_multizone.png")
 
 
 # ── Figure 3: Resource adequacy ───────────────────────────────────────────
@@ -168,7 +197,7 @@ def fig3_resources(records, available_marshals=20, outdir="results/paper_figures
                 label=f"Available ({available_marshals})")
     ax1.set_ylabel("Marshals Required")
     ax1.legend(framealpha=0.85)
-    ax1.grid(True, alpha=0.3)
+    style_axes(ax1)
     ymax = max(max(demands), available_marshals) * 1.2 + 1
     ax1.set_ylim(0, ymax)
 
@@ -189,10 +218,8 @@ def fig3_resources(records, available_marshals=20, outdir="results/paper_figures
 
     fig.suptitle("Resource Adequacy vs. Multi-Zone Risk Level",
                  fontsize=11)
-    plt.tight_layout()
-    plt.savefig(f"{outdir}/fig_resources.png", dpi=180)
-    plt.close()
-    print(f"[Fig3] Saved → {outdir}/fig_resources.png")
+    fig.tight_layout()
+    save_figure(fig, f"{outdir}/fig_resources.png")
 
 
 # ── Figure 4: Component contributions ────────────────────────────────────
@@ -226,17 +253,15 @@ def fig4_components(records, zone_filter=None, outdir="results/paper_figures"):
     zone_label = f" — {zone_filter}" if zone_filter else ""
     ax.set_title(f"CA-CRS+ Component Contributions{zone_label}")
     ax.legend(loc="upper right", framealpha=0.85)
-    ax.grid(True, alpha=0.3)
+    style_axes(ax)
     ax.set_ylim(0)
-    plt.tight_layout()
-    plt.savefig(f"{outdir}/fig_components.png", dpi=180)
-    plt.close()
-    print(f"[Fig4] Saved → {outdir}/fig_components.png")
+    fig.tight_layout()
+    save_figure(fig, f"{outdir}/fig_components.png")
 
 
 # ── Figure 5: Panic speed spike + gate action ────────────────────────────
 
-def fig5_speed_gate(records, zone_filter="Entry Zone", outdir="results/paper_figures"):
+def fig5_speed_gate(records, zone_filter="Panic Flow", outdir="results/paper_figures"):
     zone_records = [r for r in records if r["zone_name"] == zone_filter]
     if not zone_records:
         print(f"[Fig5] Skipped — no records for zone: {zone_filter}")
@@ -255,7 +280,7 @@ def fig5_speed_gate(records, zone_filter="Entry Zone", outdir="results/paper_fig
     ax1.set_xlabel("Frame")
     ax1.set_ylabel("Normalized Speed")
     ax1.set_ylim(0, 1.05)
-    ax1.grid(True, alpha=0.3)
+    style_axes(ax1)
 
     ax2 = ax1.twinx()
     ax2.plot(frames, crs, color="#C0392B", lw=1.7, label="CA-CRS+")
@@ -284,10 +309,8 @@ def fig5_speed_gate(records, zone_filter="Entry Zone", outdir="results/paper_fig
     ax1.legend(lines1 + lines2, labels1 + labels2,
                loc="upper left", framealpha=0.85)
     ax1.set_title(f"Panic Response: Speed Spike and Gate Action — {zone_filter}")
-    plt.tight_layout()
-    plt.savefig(f"{outdir}/fig_speed_gate.png", dpi=180)
-    plt.close()
-    print(f"[Fig5] Saved → {outdir}/fig_speed_gate.png")
+    fig.tight_layout()
+    save_figure(fig, f"{outdir}/fig_speed_gate.png")
 
 
 # ── Table values helper ───────────────────────────────────────────────────
@@ -317,7 +340,9 @@ def print_table_values(records):
     print(f"Mean Proj. CRS   : "
           f"{np.mean([floatf(r['proj_crs']) for r in records]):.3f}")
     print(f"Mean CRR (%)     : "
-          f"{np.mean([floatf(r['crr']) for r in records if floatf(r['crr'])>0]):.1f}%")
+          f"{np.mean([floatf(r['crr']) for r in records]):.1f}%")
+    print(f"Mean positive CRR: "
+          f"{np.mean([floatf(r['crr']) for r in records if floatf(r['crr']) > 0]):.1f}%")
 
     # Per-zone breakdown
     print("\nPer-zone DANGER count:")
@@ -362,6 +387,8 @@ if __name__ == "__main__":
                         help="Scenario label for Figure 1 title")
     parser.add_argument("--panic_zone", default=None,
                         help="Generate speed/gate figure for the selected zone")
+    parser.add_argument("--resources",  action="store_true",
+                        help="Generate marshal demand / resource adequacy figure")
     args = parser.parse_args()
 
     records = load_csv(args.csv)
@@ -370,7 +397,8 @@ if __name__ == "__main__":
 
     fig1_crs_timeline(records, args.scenario, args.outdir)
     fig4_components(records, args.zone, args.outdir)
-    fig3_resources(records, args.marshals, args.outdir)
+    if args.resources:
+        fig3_resources(records, args.marshals, args.outdir)
 
     if args.multizone:
         fig2_multizone(records, args.outdir)
